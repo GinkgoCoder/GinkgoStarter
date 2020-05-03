@@ -1,4 +1,4 @@
-<img src="./logo.png" width=200 />
+<p align="center"><img src="./logo.png" width=200 /></p>
 
 
 # Ginkgo Web Project Starter
