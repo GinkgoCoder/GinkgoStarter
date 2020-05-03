@@ -1,5 +1,7 @@
-<img src="./logo.png" style="width: 200px" />
-# Ginkgo Starter
+<img src="./logo.png" width=200 />
+
+
+# Ginkgo Web Project Starter
 This project is used to quickly create a spring boot backend project. It will use modules to implement different functionalities such as DAO and security
 
 # Structure
