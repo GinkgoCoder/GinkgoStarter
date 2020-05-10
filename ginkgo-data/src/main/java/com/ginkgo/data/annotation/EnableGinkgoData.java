@@ -1,4 +1,4 @@
-package com.ginkgo.data;
+package com.ginkgo.data.annotation;
 
 import org.springframework.context.annotation.Import;
 

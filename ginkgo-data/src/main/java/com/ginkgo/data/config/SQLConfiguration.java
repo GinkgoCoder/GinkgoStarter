@@ -1,12 +1,13 @@
-package com.ginkgo.data.configs;
+package com.ginkgo.data.config;
 
-import com.ginkgo.data.DataProperties;
 import com.ginkgo.data.enums.DDLStrategy;
 import com.ginkgo.data.enums.SQLType;
+import com.google.common.collect.Lists;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +20,12 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 @Configuration
+@EnableConfigurationProperties(DataProperties.class)
 public class SQLConfiguration {
 
     @Autowired
@@ -34,8 +37,8 @@ public class SQLConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public DataSource dataSource() {
-        if (dataProperties.getSql().getSqlType().equals(SQLType.MySQL8)) {
-            return generateSQLDataSource();
+        if (this.dataProperties.getSql().getSqlType().equals(SQLType.MySQL8)) {
+            return this.generateSQLDataSource();
         } else {
             return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).setName("test").build();
         }
@@ -44,13 +47,13 @@ public class SQLConfiguration {
     private DataSource generateSQLDataSource() {
         BasicDataSource basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        basicDataSource.setUsername(dataProperties.getSql().getUsername());
-        basicDataSource.setUrl(dataProperties.getSql().getUrl());
-        basicDataSource.setPassword(dataProperties.getSql().getPassword());
-        basicDataSource.setInitialSize(dataProperties.getSql().getInitSize());
-        basicDataSource.setMaxIdle(dataProperties.getSql().getMaxIdle());
-        basicDataSource.setMaxTotal(dataProperties.getSql().getMaxTotal());
-        basicDataSource.setMaxWaitMillis(dataProperties.getSql().getMaxWaitMillis());
+        basicDataSource.setUsername(this.dataProperties.getSql().getUsername());
+        basicDataSource.setUrl(this.dataProperties.getSql().getUrl());
+        basicDataSource.setPassword(this.dataProperties.getSql().getPassword());
+        basicDataSource.setInitialSize(this.dataProperties.getSql().getInitSize());
+        basicDataSource.setMaxIdle(this.dataProperties.getSql().getMaxIdle());
+        basicDataSource.setMaxTotal(this.dataProperties.getSql().getMaxTotal());
+        basicDataSource.setMaxWaitMillis(this.dataProperties.getSql().getMaxWaitMillis());
         return basicDataSource;
     }
 
@@ -60,7 +63,7 @@ public class SQLConfiguration {
         LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
         HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
 
-        if (dataProperties.getSql().getSqlType().equals(SQLType.MySQL8)) {
+        if (this.dataProperties.getSql().getSqlType().equals(SQLType.MySQL8)) {
             jpaVendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
             jpaVendorAdapter.setDatabase(Database.MYSQL);
         } else {
@@ -73,27 +76,37 @@ public class SQLConfiguration {
         Properties properties = new Properties();
         // Create or Create-Drop for Dev, Update for Production
         properties.setProperty("hibernate.hbm2ddl.auto",
-                dataProperties.getSql().getDdlAuto().equals(DDLStrategy.CreateDrop)
+                this.dataProperties.getSql().getDdlAuto().equals(DDLStrategy.CreateDrop)
                         ? "Create-Drop"
-                        : dataProperties.getSql().getDdlAuto().name());
-        emfb.setPackagesToScan(dataProperties.getSql().getEntityScanPackage() == null ?
-                getCurrentProjectBasicPath() : dataProperties.getSql().getEntityScanPackage());
+                        : this.dataProperties.getSql().getDdlAuto().name());
+
+        emfb.setPackagesToScan(this.getPackages());
         emfb.setJpaVendorAdapter(jpaVendorAdapter);
-        emfb.setDataSource(dataSource());
+        emfb.setDataSource(this.dataSource());
 
         return emfb;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PlatformTransactionManager transactionManager(){
+    public PlatformTransactionManager transactionManager() {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+        jpaTransactionManager.setEntityManagerFactory(this.entityManagerFactory().getObject());
         return jpaTransactionManager;
     }
 
+    private String[] getPackages() {
+        List<String> packages = Lists.newArrayList();
+        if (this.dataProperties.getSql().getEntityScanPackage() == null) {
+            packages.add(this.getCurrentProjectBasicPath());
+        } else {
+            packages.addAll(Lists.newArrayList(this.dataProperties.getSql().getEntityScanPackage().split(";")));
+        }
+        return packages.stream().toArray(String[]::new);
+    }
+
     public String getCurrentProjectBasicPath() {
-        Map<String, Object> candidates = applicationContext.getBeansWithAnnotation(SpringBootApplication.class);
+        Map<String, Object> candidates = this.applicationContext.getBeansWithAnnotation(SpringBootApplication.class);
         return candidates.isEmpty() ? null : candidates.values().toArray()[0].getClass().getPackage().getName();
     }
 }

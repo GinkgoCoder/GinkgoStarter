@@ -1,19 +1,13 @@
-package com.ginkgo.data;
+package com.ginkgo.data.config;
 
 import com.ginkgo.data.enums.DDLStrategy;
 import com.ginkgo.data.enums.SQLType;
 import lombok.Data;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
 
-@EnableConfigurationProperties
-@EnableAutoConfiguration
-@ComponentScan(basePackages = "com.ginkgo.data")
-@ConfigurationProperties(prefix = "ginkgo.data")
 @Data
+@ConfigurationProperties(prefix = "ginkgo.data")
 public class DataProperties {
 
     private Redis redis = new Redis();
