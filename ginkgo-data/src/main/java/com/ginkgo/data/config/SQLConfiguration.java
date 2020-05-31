@@ -96,7 +96,7 @@ public class SQLConfiguration {
     }
 
     private String[] getPackages() {
-        List<String> packages = Lists.newArrayList();
+        List<String> packages = Lists.newArrayList("com.ginkgo");
         if (this.dataProperties.getSql().getEntityScanPackage() == null) {
             packages.add(this.getCurrentProjectBasicPath());
         } else {
