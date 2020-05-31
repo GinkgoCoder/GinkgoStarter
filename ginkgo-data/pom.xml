@@ -7,8 +7,8 @@
         <groupId>com.ginkgo</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <groupId>com.gingkgo</groupId>
-    <artifactId>ginkgo-data</artifactId>
+    <groupId>com.ginkgo</groupId>
+    <artifactId>data</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>data</name>
     <description>Ginkgo Data Module</description>

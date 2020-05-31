@@ -5,8 +5,8 @@
     <packaging>pom</packaging>
     <modules>
         <!--        <module>demo</module>-->
-        <module>data</module>
-        <module>security</module>
+        <module>ginkgo-data</module>
+        <module>ginkgo-security</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
